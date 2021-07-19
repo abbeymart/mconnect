@@ -6,7 +6,7 @@ using ToJSON;
 
 namespace MConnect.AuditLog
 {
-    public enum AuditLogType
+    public enum AuditLog1Type
     {
         Create,
         Update,
@@ -16,7 +16,7 @@ namespace MConnect.AuditLog
         Logout,
     }
 
-    public enum SysAuditLogType
+    public enum SysAuditLog1Type
     {
         App,
         Data,
@@ -25,7 +25,7 @@ namespace MConnect.AuditLog
         Unknown,
     }
 
-    public class AuditLog1Type
+    public static class AuditLogType
     {
         public const string Create = "create";
         public const string Update = "update";
@@ -35,7 +35,7 @@ namespace MConnect.AuditLog
         public const string Logout = "logout";
     }
 
-    public class SysAuditLog1Type
+    public static class SysAuditLogType
     {
         public const string App = "app";
         public const string Data = "data";
@@ -43,13 +43,13 @@ namespace MConnect.AuditLog
         public const string Other = "other";
         public const string Unknown = "unknown";
     }
-    
+
     [Table("audits")]
     public class Audit
     {
         [PrimaryKey] [Column("id")] public Guid Id { get; set; }
 
-        [Column("log_type")] public AuditLogType LogType { get; set; }
+        [Column("log_type")] public string LogType { get; set; }
         [Column("log_table")] public string LogTable { get; set; }
         [Column("table_records")] public string TableRecords { get; set; }
         [Column("log_by")] public string LogBy { get; set; }
@@ -61,7 +61,7 @@ namespace MConnect.AuditLog
     {
         [PrimaryKey] [Column("id")] public Guid Id { get; set; }
 
-        [Column("log_type")] public SysAuditLogType LogType { get; set; }
+        [Column("log_type")] public string LogType { get; set; }
         [Column("log_message")] public string LogMessage { get; set; }
         [Column("log_by")] public string LogBy { get; set; }
         [Column("log_code")] public string LogCode { get; set; }
@@ -95,7 +95,7 @@ namespace MConnect.AuditLog
             return conn;
         }
 
-        public string AuditLog(AuditLogType logType, string logTable, object tableRecords,
+        public string AuditLog(string logType, string logTable, object tableRecords,
             string logBy = "", object newTableRecords = default)
         {
             var errorMessage = "";
@@ -127,7 +127,7 @@ namespace MConnect.AuditLog
             }
 
             Audit record;
-            switch (logType)
+            switch (logType.ToLower())
             {
                 case AuditLogType.Create:
                 case AuditLogType.Read:
@@ -171,7 +171,7 @@ namespace MConnect.AuditLog
                     Console.WriteLine($"{fromJson}");
                     break;
                 default:
-                    return $"Non-support crud-audit-log-type: {logType.ToString()}";
+                    return $"Non-supported crud-audit-log-type: {logType.ToString()}";
             }
 
             // perform crud-task
@@ -180,7 +180,7 @@ namespace MConnect.AuditLog
             return result < 1 ? "error" : "success";
         }
 
-        public string SystemAuditLog(SysAuditLogType logType, string logMessage,
+        public string SystemAuditLog(string logType, string logMessage,
             string logBy = "", string logCode = "SYS100", string logDesc = "")
         {
             var errorMessage = "";
@@ -198,16 +198,28 @@ namespace MConnect.AuditLog
             }
 
             // compose SysAudit model-object
-            var record = new SysAudit
-            {
-                Id = new Guid(),
-                LogType = logType,
-                LogMessage = logMessage,
-                LogBy = logBy,
-                LogCode = logCode,
-                LogDesc = logDesc,
-            };
+            SysAudit record;
 
+            switch (logType.ToLower())
+            {
+                case SysAuditLogType.App:
+                case SysAuditLogType.Env:
+                case SysAuditLogType.Data:
+                case SysAuditLogType.Other:
+                case SysAuditLogType.Unknown:
+                    record = new SysAudit
+                    {
+                        Id = new Guid(),
+                        LogType = logType,
+                        LogMessage = logMessage,
+                        LogBy = logBy,
+                        LogCode = logCode,
+                        LogDesc = logDesc,
+                    };
+                    break;
+                default:
+                    return $"Non-supported crud-audit-log-type: {logType.ToString()}";
+            }
             // perform crud-task
             using var conn = DbCon();
             var result = conn.Insert(record);
