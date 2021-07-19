@@ -6,15 +6,6 @@ namespace MConnect.AuditLog
 {
     public class LiteDbAudit
     {
-        private LiteDatabase _db;
-        private string _auditTable;
-
-        public LiteDbAudit()
-        {
-            _db = DbCon();
-            _auditTable = "audits";
-        }
-
         private static LiteDatabase DbCon()
         {
             // set the user-data-path
@@ -25,7 +16,7 @@ namespace MConnect.AuditLog
             return db;
         }
 
-        public string AuditLog(AuditLogType auditLogType, string logTable, string logBy, object tableRecords,
+        public string AuditLog(string auditLogType, string logTable, string logBy, object tableRecords,
             object newTableRecords)
         {
             var errorMessage = "";
