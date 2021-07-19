@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Crud" />
+      <Folder Include="Db" />
+      <Folder Include="Mail" />
+      <Folder Include="Orm" />
+      <Folder Include="Testing" />
+      <Folder Include="Utils" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Json.Net" Version="1.0.33" />
+      <PackageReference Include="LiteDB" Version="2.0.4" />
+      <PackageReference Include="sqlite-net-pcl" Version="1.8.0-beta" />
+      <PackageReference Include="System.Data.SQLite.Core" Version="1.0.114.3" />
+      <PackageReference Include="toJSON" Version="1.0.0.4" />
+    </ItemGroup>
+
+</Project>
