@@ -25,12 +25,29 @@ namespace MConnect.AuditLog
         Unknown,
     }
 
+    public class AuditLog1Type
+    {
+        public const string Create = "create";
+        public const string Update = "update";
+        public const string Read = "read";
+        public const string Delete = "delete";
+        public const string Login = "login";
+        public const string Logout = "logout";
+    }
+
+    public class SysAuditLog1Type
+    {
+        public const string App = "app";
+        public const string Data = "data";
+        public const string Env = "env";
+        public const string Other = "other";
+        public const string Unknown = "unknown";
+    }
+    
     [Table("audits")]
     public class Audit
     {
-        [PrimaryKey]
-        [Column("id")]
-        public Guid Id { get; set; }
+        [PrimaryKey] [Column("id")] public Guid Id { get; set; }
 
         [Column("log_type")] public AuditLogType LogType { get; set; }
         [Column("log_table")] public string LogTable { get; set; }
@@ -42,9 +59,7 @@ namespace MConnect.AuditLog
     [Table("sys_audits")]
     public class SysAudit
     {
-        [PrimaryKey]
-        [Column("id")]
-        public Guid Id { get; set; }
+        [PrimaryKey] [Column("id")] public Guid Id { get; set; }
 
         [Column("log_type")] public SysAuditLogType LogType { get; set; }
         [Column("log_message")] public string LogMessage { get; set; }
@@ -53,7 +68,7 @@ namespace MConnect.AuditLog
         [Column("log_desc")] public object LogDesc { get; set; }
     }
 
-    
+
     public class SqLiteAudit
     {
         private static SQLiteConnection DbCon()
@@ -111,7 +126,7 @@ namespace MConnect.AuditLog
                 return errorMessage;
             }
 
-            var record = new Audit();
+            Audit record;
             switch (logType)
             {
                 case AuditLogType.Create:
@@ -119,7 +134,7 @@ namespace MConnect.AuditLog
                 case AuditLogType.Delete:
                 case AuditLogType.Login:
                 case AuditLogType.Logout:
-                    // TODO: compose Audit model-object
+                    // compose Audit model-object
                     record = new Audit
                     {
                         Id = new Guid(),
@@ -142,7 +157,7 @@ namespace MConnect.AuditLog
                         return errorMessage;
                     }
 
-                    // TODO: compose Audit model-object
+                    // compose Audit model-object
                     record = new Audit
                     {
                         Id = new Guid(),
@@ -166,22 +181,23 @@ namespace MConnect.AuditLog
         }
 
         public string SystemAuditLog(SysAuditLogType logType, string logMessage,
-            string logBy = "", string logCode= "SYS100", string logDesc = "")
+            string logBy = "", string logCode = "SYS100", string logDesc = "")
         {
             var errorMessage = "";
             // validate params/values
-           if (string.IsNullOrEmpty(logMessage))
+            if (string.IsNullOrEmpty(logMessage))
             {
                 errorMessage = !string.IsNullOrEmpty(errorMessage)
                     ? errorMessage + " | logMessage is required."
                     : "logMessage is required.";
             }
+
             if (!string.IsNullOrEmpty(errorMessage))
             {
                 return errorMessage;
             }
-            
-            // TODO: compose Audit model-object
+
+            // compose SysAudit model-object
             var record = new SysAudit
             {
                 Id = new Guid(),
