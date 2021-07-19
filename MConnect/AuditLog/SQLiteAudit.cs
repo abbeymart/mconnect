@@ -6,25 +6,9 @@ using ToJSON;
 
 namespace MConnect.AuditLog
 {
-    public enum AuditLog1Type
-    {
-        Create,
-        Update,
-        Read,
-        Delete,
-        Login,
-        Logout,
-    }
-
-    public enum SysAuditLog1Type
-    {
-        App,
-        Data,
-        Env,
-        Other,
-        Unknown,
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public static class AuditLogType
     {
         public const string Create = "create";
@@ -35,15 +19,9 @@ namespace MConnect.AuditLog
         public const string Logout = "logout";
     }
 
-    public static class SysAuditLogType
-    {
-        public const string App = "app";
-        public const string Data = "data";
-        public const string Env = "env";
-        public const string Other = "other";
-        public const string Unknown = "unknown";
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Table("audits")]
     public class Audit
     {
@@ -56,19 +34,6 @@ namespace MConnect.AuditLog
         [Column("new_table_records")] public string NewTableRecords { get; set; }
     }
 
-    [Table("sys_audits")]
-    public class SysAudit
-    {
-        [PrimaryKey] [Column("id")] public Guid Id { get; set; }
-
-        [Column("log_type")] public string LogType { get; set; }
-        [Column("log_message")] public string LogMessage { get; set; }
-        [Column("log_by")] public string LogBy { get; set; }
-        [Column("log_code")] public string LogCode { get; set; }
-        [Column("log_desc")] public object LogDesc { get; set; }
-    }
-
-
     public class SqLiteAudit
     {
         private static SQLiteConnection DbCon()
@@ -80,18 +45,8 @@ namespace MConnect.AuditLog
             var options = new SQLiteConnectionString(dataSource, false);
             // activate/establish db-connection
             var conn = new SQLiteConnection(options);
-            return conn;
-        }
-
-        private static SQLiteConnection SysDbCon()
-        {
-            // set the user-data-path
-            var dataSource = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "mcSysAudit.db");
-            // compose the connection string
-            var options = new SQLiteConnectionString(dataSource, false);
-            // activate/establish db-connection
-            var conn = new SQLiteConnection(options);
+            // create table, if not exist
+            conn.CreateTable<Audit>();
             return conn;
         }
 
@@ -171,55 +126,9 @@ namespace MConnect.AuditLog
                     Console.WriteLine($"{fromJson}");
                     break;
                 default:
-                    return $"Non-supported crud-audit-log-type: {logType.ToString()}";
+                    return $"Non-supported crud-audit-log-type: {logType}";
             }
 
-            // perform crud-task
-            using var conn = DbCon();
-            var result = conn.Insert(record);
-            return result < 1 ? "error" : "success";
-        }
-
-        public string SystemAuditLog(string logType, string logMessage,
-            string logBy = "", string logCode = "SYS100", string logDesc = "")
-        {
-            var errorMessage = "";
-            // validate params/values
-            if (string.IsNullOrEmpty(logMessage))
-            {
-                errorMessage = !string.IsNullOrEmpty(errorMessage)
-                    ? errorMessage + " | logMessage is required."
-                    : "logMessage is required.";
-            }
-
-            if (!string.IsNullOrEmpty(errorMessage))
-            {
-                return errorMessage;
-            }
-
-            // compose SysAudit model-object
-            SysAudit record;
-
-            switch (logType.ToLower())
-            {
-                case SysAuditLogType.App:
-                case SysAuditLogType.Env:
-                case SysAuditLogType.Data:
-                case SysAuditLogType.Other:
-                case SysAuditLogType.Unknown:
-                    record = new SysAudit
-                    {
-                        Id = new Guid(),
-                        LogType = logType,
-                        LogMessage = logMessage,
-                        LogBy = logBy,
-                        LogCode = logCode,
-                        LogDesc = logDesc,
-                    };
-                    break;
-                default:
-                    return $"Non-supported crud-audit-log-type: {logType.ToString()}";
-            }
             // perform crud-task
             using var conn = DbCon();
             var result = conn.Insert(record);
