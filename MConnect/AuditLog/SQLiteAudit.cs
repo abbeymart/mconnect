@@ -29,9 +29,9 @@ namespace MConnect.AuditLog
 
         [Column("log_type")] public string LogType { get; set; }
         [Column("log_table")] public string LogTable { get; set; }
-        [Column("table_records")] public string TableRecords { get; set; }
+        [Column("table_records")] public string LogRecords { get; set; }
         [Column("log_by")] public string LogBy { get; set; }
-        [Column("new_table_records")] public string NewTableRecords { get; set; }
+        [Column("new_table_records")] public string NewLogRecords { get; set; }
     }
 
     public class SqLiteAudit
@@ -95,7 +95,7 @@ namespace MConnect.AuditLog
                         Id = new Guid(),
                         LogType = logType,
                         LogTable = logTable,
-                        TableRecords = tableRecords.ToJSON(),
+                        LogRecords = tableRecords.ToJSON(),
                         LogBy = logBy
                     };
                     break;
@@ -118,11 +118,11 @@ namespace MConnect.AuditLog
                         Id = new Guid(),
                         LogType = logType,
                         LogTable = logTable,
-                        TableRecords = tableRecords.ToJSON(),
+                        LogRecords = tableRecords.ToJSON(),
                         LogBy = logBy,
-                        NewTableRecords = newTableRecords.ToJSON()
+                        NewLogRecords = newTableRecords.ToJSON()
                     };
-                    var fromJson = JsonConvert.DeserializeObject(record.TableRecords);
+                    var fromJson = JsonConvert.DeserializeObject(record.LogRecords);
                     Console.WriteLine($"{fromJson}");
                     break;
                 default:
